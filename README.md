@@ -1,2 +1,1 @@
-# personalPrj
-personal project
+﻿tstAi_ssh

@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  auto-writer:
+    build: .
+    container_name: auto-writer-wp
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./images:/app/images
+      - ./runs:/app/runs
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    command: ["poetry", "run", "python", "-m", "src.apps.cli.main", "config"]
+
+  # 개발용 서비스 (API 서버)
+  api:
+    build: .
+    container_name: auto-writer-api
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./images:/app/images
+      - ./runs:/app/runs
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    command: ["poetry", "run", "uvicorn", "src.apps.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    profiles:
+      - api
+
+  # 스케줄러 서비스
+  scheduler:
+    build: .
+    container_name: auto-writer-scheduler
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./images:/app/images
+      - ./runs:/app/runs
+    restart: unless-stopped
+    command: ["poetry", "run", "python", "-m", "src.apps.scheduler.main"]
+    profiles:
+      - scheduler
+
+volumes:
+  data:
+  logs:
+  images:
+  runs:
